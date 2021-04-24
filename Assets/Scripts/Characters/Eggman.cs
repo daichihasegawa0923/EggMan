@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Diamond.Extensions.AnimatorExtension;
 
 namespace Diamond.EggmanSimulator.Characters
 {
@@ -15,18 +16,17 @@ namespace Diamond.EggmanSimulator.Characters
         [SerializeField]
         private Vector3 _cameraDistance;
 
-        private Vector3 _latestPosition;
+        [SerializeField]
+        private float _speed = 1.0f;
 
-
-        private void Start()
-        {
-            _latestPosition = transform.position;
-        }
+        [SerializeField]
+        private Animator _animator;
 
         private void Update()
         {
             OperateCamera();
             OperateCharacterMove();
+            OperateAnimation();
         }
 
         private void OperateCamera()
@@ -42,16 +42,27 @@ namespace Diamond.EggmanSimulator.Characters
             var vMotion = Input.GetAxis("Vertical");
 
             var velocity = _rigidbody.velocity;
-            velocity.x = hMotion;
-            velocity.z = vMotion;
+            velocity.x = hMotion * _speed;
+            velocity.z = vMotion * _speed;
             _rigidbody.velocity = velocity;
 
-            var diff = transform.position - _latestPosition;
 
-            if (diff.magnitude > 0.01f)
-                transform.rotation = Quaternion.LookRotation(diff);
+            if (Mathf.Abs(hMotion) > 0 || Mathf.Abs(vMotion) > 0)
+                transform.LookAt(transform.position + _rigidbody.velocity);
 
-            _latestPosition = transform.position;
+            _rigidbody.angularVelocity = Vector3.zero;
+        }
+
+        private void OperateAnimation()
+        {
+            var hMotion = Input.GetAxis("Horizontal");
+            var vMotion = Input.GetAxis("Vertical");
+
+            if (Mathf.Abs(hMotion) > 0 || Mathf.Abs(vMotion) > 0)
+                _animator.SetBoolTrueOnly("isWalk");
+            else
+                _animator.SetBoolTrueOnly("isStay");
+
         }
     }
 }
