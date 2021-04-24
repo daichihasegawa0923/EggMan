@@ -48,7 +48,13 @@ namespace Diamond.EggmanSimulator.Characters
 
 
             if (Mathf.Abs(hMotion) > 0 || Mathf.Abs(vMotion) > 0)
+            {
                 transform.LookAt(transform.position + _rigidbody.velocity);
+                var spin = transform.eulerAngles;
+                spin.x = 0;
+                spin.z = 0;
+                transform.eulerAngles = spin;
+            }
 
             _rigidbody.angularVelocity = Vector3.zero;
         }
