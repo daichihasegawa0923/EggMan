@@ -96,6 +96,9 @@ namespace Diamond.EggmanSimulator.Characters
         /// </summary>
         public void SetTransparentMaterial()
         {
+            if (_meshRenderer == null)
+                return;
+
             _meshRenderer.material = _transparentMaterial;
             var materialArray = _meshRenderer.materials;
 
@@ -112,6 +115,9 @@ namespace Diamond.EggmanSimulator.Characters
         /// </summary>
         public void SetOriginMaterial()
         {
+            if (_meshRenderer == null)
+                return;
+
             _meshRenderer.material = _originMaterial[0];
             _meshRenderer.materials = _originMaterial;
         }

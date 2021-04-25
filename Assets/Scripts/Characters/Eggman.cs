@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Diamond.Extensions.AnimatorExtension;
+using Diamond.EggmanSimulator.BreakGimic;
 
 namespace Diamond.EggmanSimulator.Characters
 {
@@ -21,6 +22,9 @@ namespace Diamond.EggmanSimulator.Characters
 
         [SerializeField]
         private Animator _animator;
+
+        [SerializeField]
+        private MeshBreaker _meshBreaker;
 
         private void Update()
         {
@@ -69,6 +73,13 @@ namespace Diamond.EggmanSimulator.Characters
             else
                 _animator.SetBoolTrueOnly("isStay");
 
+        }
+
+        private void OnCollisionEnter(Collision collision)
+        {
+            var go = collision.gameObject;
+            if(!go.isStatic)
+                _meshBreaker.BreakMesh(go);
         }
     }
 }
