@@ -19,7 +19,7 @@ namespace Diamond.EggmanSimulator.Gimics
 
         public override void Damaged(DamageStatus damageStatus)
         {
-            _meshBreaker.BreakMesh(gameObject,damageStatus.DamagedPosition,3);
+            _meshBreaker.BreakMesh(gameObject,damageStatus.DamagedPosition,4);
             Destroy(gameObject);
         }
     }
