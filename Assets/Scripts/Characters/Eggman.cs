@@ -79,7 +79,7 @@ namespace Diamond.EggmanSimulator.Characters
         {
             var go = collision.gameObject;
             if(!go.isStatic)
-                _meshBreaker.BreakMesh(go);
+                _meshBreaker.BreakMesh(go,3);
         }
     }
 }
