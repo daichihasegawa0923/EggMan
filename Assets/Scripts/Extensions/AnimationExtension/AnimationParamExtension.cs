@@ -10,8 +10,8 @@ namespace Diamond.Extensions.AnimatorExtension
         ///  Change value of parametor is type of bool to true
         /// </summary>
         /// <param name="animator">Animator</param>
-        /// <param name="parametorName">Parametor name you want to set true</param>
-        public static void SetBoolTrueOnly(this Animator animator, string parametorName)
+        /// <param name="parameterName">Parameter name you want to set true</param>
+        public static void SetBoolTrueOnly(this Animator animator, string parameterName)
         {
             var paras = animator.parameters;
             foreach (var para in paras)
@@ -19,7 +19,7 @@ namespace Diamond.Extensions.AnimatorExtension
                 if (para.type != AnimatorControllerParameterType.Bool)
                     continue;
 
-                animator.SetBool(para.name, para.name == parametorName);
+                animator.SetBool(para.name, para.name == parameterName);
             }
         }
 

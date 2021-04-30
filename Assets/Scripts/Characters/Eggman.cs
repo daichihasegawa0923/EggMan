@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Diamond.Extensions.AnimatorExtension;
 using Diamond.EggmanSimulator.BreakGimic;
+using Diamond.EggmanSimulator.Gimics;
 
 namespace Diamond.EggmanSimulator.Characters
 {
@@ -25,6 +26,15 @@ namespace Diamond.EggmanSimulator.Characters
 
         [SerializeField]
         private MeshBreaker _meshBreaker;
+
+        [SerializeField]
+        private Burret _burret;
+
+        [SerializeField]
+        private Transform _burretMouse;
+
+        [SerializeField]
+        private float _burretSpeed = 10;
 
         private void Update()
         {
@@ -63,6 +73,7 @@ namespace Diamond.EggmanSimulator.Characters
             _rigidbody.angularVelocity = Vector3.zero;
         }
 
+
         private void OperateAnimation()
         {
             var hMotion = Input.GetAxis("Horizontal");
@@ -73,13 +84,25 @@ namespace Diamond.EggmanSimulator.Characters
             else
                 _animator.SetBoolTrueOnly("isStay");
 
+            if(Input.GetKeyDown(KeyCode.Space))
+            {
+                _animator.SetTrigger("Throw");
+            }
         }
 
-        private void OnCollisionEnter(Collision collision)
+        /// <summary>
+        /// Invoked by animation.
+        /// </summary>
+        public void Fire()
         {
-            var go = collision.gameObject;
-            if(!go.isStatic)
-                _meshBreaker.BreakMesh(go,3);
+            var burret = Instantiate(_burret.gameObject);
+            burret.transform.position = _burretMouse.position;
+            var rigidbody = burret.GetComponent<Rigidbody>();
+            if (rigidbody == null)
+                rigidbody = burret.AddComponent<Rigidbody>();
+
+            rigidbody.velocity = transform.forward * _burretSpeed;
+            rigidbody.velocity += Vector3.up;
         }
     }
 }

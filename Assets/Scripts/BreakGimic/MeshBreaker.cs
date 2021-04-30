@@ -18,9 +18,8 @@ namespace Diamond.EggmanSimulator.BreakGimic
         {
             try
             {
-                if (count == 0 || gObject.tag == "IsBroken")
+                if (count == 0)
                 {
-                    gObject.tag = "IsBroken";
                     return;
                 }
 
@@ -33,72 +32,66 @@ namespace Diamond.EggmanSimulator.BreakGimic
 
                 var objects = MeshCut.Cut(gObject, gObject.transform.position, direction, gObject.GetComponent<MeshRenderer>().material);
 
-                objects.ToList().ForEach(o =>
-                {
-                    o.transform.parent = null;
-
-                    if (o.GetComponent<BoxCollider>())
-                        Destroy(o.GetComponent<BoxCollider>());
-
-                    if (o.GetComponent<MeshCollider>())
-                        Destroy(o.GetComponent<MeshCollider>());
-
-                    var meshCollider = o.AddComponent<MeshCollider>();
-                    meshCollider.convex = true;
-
-                    if (o.GetComponent<Rigidbody>() == null)
-                        o.AddComponent<Rigidbody>();
-
-                    BreakMesh(o, count);
-                });
+                objects.ToList().ForEach(o => RebreakObject(o, count));
             }
             catch(Exception e)
             {
                 Debug.LogAssertion(e.Message);
                 return;
             }
-
-            /*
-            count--;
-
-            var gObjects = new GameObject[] { };
-
-            if (count == 0)
+        }
+        /// <summary>
+        /// brake objects mesh
+        /// </summary>
+        /// <param name="gObject">object will be broken</param>
+        /// <param name="position">broken point</param>
+        /// <param name="count">re-brake count</param>
+        /// <returns>broken objects</returns>
+        public void BreakMesh(GameObject gObject, Vector3 position ,int count)
+        {
+            try
             {
-                var currentObject = new GameObject[] { gObject };
-                return currentObject;
-            }
-
-            foreach (var g in gObjects)
-            {
-
-                var cutObjects = CutMesh(g);
-
-                foreach(var c in cutObjects)
+                if (count == 0)
                 {
-                    gObjects.Concat(BreakMesh(c,count));
+                    return;
                 }
-            }
 
-            return gObjects;
-            */
+                count--;
+
+                var direction = Vector3.one;
+                direction.x = UnityEngine.Random.Range(-1, 1);
+                direction.y = UnityEngine.Random.Range(-1, 1);
+                direction.z = UnityEngine.Random.Range(-1, 1);
+
+                var objects = MeshCut.Cut(gObject, position, direction, gObject.GetComponent<MeshRenderer>().material);
+
+                objects.ToList().ForEach(o => RebreakObject(o, count));
+            }
+            catch (Exception e)
+            {
+                Debug.LogAssertion(e.Message);
+                return;
+            }
         }
 
-        private GameObject[] CutMesh(GameObject gObject)
+        private void RebreakObject(GameObject gObject, int count)
         {
+            gObject.transform.parent = null;
 
 
-            var cutObjects = new GameObject[] { };
+            if (gObject.GetComponent<BoxCollider>())
+                Destroy(gObject.GetComponent<BoxCollider>());
 
-            var meshFilter = gObject.GetComponent<MeshFilter>();
-            var meshRenderer = gObject.GetComponent<MeshRenderer>();
+            if (gObject.GetComponent<MeshCollider>())
+                Destroy(gObject.GetComponent<MeshCollider>());
 
-            if (meshFilter == null || meshRenderer == null)
-                return cutObjects;
+            var boxCollider = gObject.AddComponent<BoxCollider>();
+            boxCollider.size = Vector3.one * 0.5f;
 
+            if (gObject.GetComponent<Rigidbody>() == null)
+                gObject.AddComponent<Rigidbody>();
 
-
-            return cutObjects;
+            BreakMesh(gObject, count);
         }
     }
 }
