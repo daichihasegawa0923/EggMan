@@ -36,6 +36,14 @@ namespace Diamond.EggmanSimulator.Characters
         [SerializeField]
         private float _burretSpeed = 10;
 
+        [SerializeField]
+        private AudioSource _audioSource;
+
+        [SerializeField]
+        private AudioClip _walkAudioClip;
+
+        private bool _isThrowing = false;
+
         private void Update()
         {
             OperateCamera();
@@ -51,6 +59,8 @@ namespace Diamond.EggmanSimulator.Characters
 
         private void OperateCharacterMove()
         {
+            if (_isThrowing)
+                return;
 
             var hMotion = Input.GetAxis("Horizontal");
             var vMotion = Input.GetAxis("Vertical");
@@ -68,6 +78,19 @@ namespace Diamond.EggmanSimulator.Characters
                 spin.x = 0;
                 spin.z = 0;
                 transform.eulerAngles = spin;
+
+                if(_audioSource.clip != null && (!_audioSource.clip.Equals(_walkAudioClip)) || ! _audioSource.isPlaying)
+                {
+                    _audioSource.clip = _walkAudioClip;
+                    _audioSource.pitch = 3.0f;
+                    _audioSource.loop = true;
+                    _audioSource.Play();
+                }
+            }
+            else
+            {
+                _audioSource.pitch = 1.0f;
+                _audioSource.clip = null;
             }
 
             _rigidbody.angularVelocity = Vector3.zero;
@@ -84,7 +107,7 @@ namespace Diamond.EggmanSimulator.Characters
             else
                 _animator.SetBoolTrueOnly("isStay");
 
-            if(Input.GetKeyDown(KeyCode.Space))
+            if(Input.GetKeyDown(KeyCode.Space) && !_isThrowing)
             {
                 _animator.SetTrigger("Throw");
             }
@@ -103,6 +126,22 @@ namespace Diamond.EggmanSimulator.Characters
 
             rigidbody.velocity = transform.forward * _burretSpeed;
             rigidbody.velocity += Vector3.up;
+        }
+
+        /// <summary>
+        /// アニメーションから呼ぶ
+        /// </summary>
+        public void StartThrowing()
+        {
+            _isThrowing = true;
+        }
+
+        /// <summary>
+        /// アニメーションから呼ぶ
+        /// </summary>
+        public void EndThrowing()
+        {
+            _isThrowing = false;
         }
     }
 }

@@ -85,8 +85,8 @@ namespace Diamond.EggmanSimulator.BreakGimic
             if (gObject.GetComponent<MeshCollider>())
                 Destroy(gObject.GetComponent<MeshCollider>());
 
-            var meshCollider = gObject.AddComponent<MeshCollider>();
-            meshCollider.convex = true;
+            var boxCollider = gObject.AddComponent<BoxCollider>();
+            boxCollider.size = Vector3.one * 0.25f;
 
             var rigidbody = gObject.GetComponent<Rigidbody>();
             if (rigidbody == null)
