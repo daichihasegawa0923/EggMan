@@ -4,6 +4,7 @@ using UnityEngine;
 using Diamond.Extensions.AnimatorExtension;
 using Diamond.EggmanSimulator.BreakGimic;
 using Diamond.EggmanSimulator.Gimics;
+using System.Linq;
 
 namespace Diamond.EggmanSimulator.Characters
 {
@@ -66,14 +67,18 @@ namespace Diamond.EggmanSimulator.Characters
             var vMotion = Input.GetAxis("Vertical");
 
             var velocity = _rigidbody.velocity;
-            velocity.x = hMotion * _speed;
-            velocity.z = vMotion * _speed;
+            velocity.x = IsFoot ? (hMotion * _speed) : 0;
+            velocity.z = IsFoot ? (vMotion * _speed) : 0;
             _rigidbody.velocity = velocity;
 
 
             if (Mathf.Abs(hMotion) > 0 || Mathf.Abs(vMotion) > 0)
             {
-                transform.LookAt(transform.position + _rigidbody.velocity);
+                var direction = Vector3.zero;
+                direction.x = hMotion;
+                direction.z = vMotion;
+
+                transform.LookAt(transform.position + direction);
                 var spin = transform.eulerAngles;
                 spin.x = 0;
                 spin.z = 0;
@@ -85,6 +90,15 @@ namespace Diamond.EggmanSimulator.Characters
                     _audioSource.pitch = 3.0f;
                     _audioSource.loop = true;
                     _audioSource.Play();
+                }
+
+                if(IsFoot && !_audioSource.isPlaying)
+                {
+                    _audioSource.Play();
+                }
+                else if(!IsFoot && _audioSource.isPlaying)
+                {
+                    _audioSource.Pause();
                 }
             }
             else
@@ -111,6 +125,11 @@ namespace Diamond.EggmanSimulator.Characters
             {
                 _animator.SetTrigger("Throw");
             }
+
+            if(!IsFoot)
+            {
+                _animator.SetBoolTrueOnly("isSky");
+            }
         }
 
         /// <summary>
@@ -129,7 +148,21 @@ namespace Diamond.EggmanSimulator.Characters
         }
 
         /// <summary>
-        /// アニメーションから呼ぶ
+        /// Character is foot on the floor
+        /// </summary>
+        /// <returns>is foot</returns>
+        public bool IsFoot
+        {
+            get
+            {
+                var all = Physics.BoxCastAll (transform.position, Vector3.one * 0.5f, Vector3.down,Quaternion.identity,1.0f);
+                var result = all.ToList().Where(a => !a.collider.gameObject.Equals(gameObject));
+                return result.Count() >= 1;
+            }
+        }
+
+        /// <summary>
+        /// ?A?j???[?V????????????
         /// </summary>
         public void StartThrowing()
         {
@@ -137,7 +170,7 @@ namespace Diamond.EggmanSimulator.Characters
         }
 
         /// <summary>
-        /// アニメーションから呼ぶ
+        /// ?A?j???[?V????????????
         /// </summary>
         public void EndThrowing()
         {
