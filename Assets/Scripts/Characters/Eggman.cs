@@ -45,17 +45,35 @@ namespace Diamond.EggmanSimulator.Characters
 
         private bool _isThrowing = false;
 
+        [SerializeField]
+        private GameObject _cameraParent;
+
+        [SerializeField]
+        private GameObject _mainBody;
+
         private void Update()
         {
-            OperateCamera();
-            OperateCharacterMove();
             OperateAnimation();
         }
 
+        private void FixedUpdate()
+        {
+            OperateCamera();
+            OperateCharacterMove();
+        }
         private void OperateCamera()
         {
-            _camera.transform.position = transform.position + _cameraDistance;
             _camera.transform.LookAt(this.transform.position);
+            _cameraParent.transform.position = transform.position;
+
+            if (Input.GetMouseButton(0))
+            {
+                var mouseMoveX = Input.GetAxis("Mouse X");
+                var spin = _cameraParent.transform.localEulerAngles;
+                spin.y -= mouseMoveX * 10;
+                Debug.Log(mouseMoveX);
+                _cameraParent.transform.localEulerAngles = spin;
+            }
         }
 
         private void OperateCharacterMove()
@@ -66,10 +84,13 @@ namespace Diamond.EggmanSimulator.Characters
             var hMotion = Input.GetAxis("Horizontal");
             var vMotion = Input.GetAxis("Vertical");
 
-            var velocity = _rigidbody.velocity;
-            velocity.x = IsFoot ? (hMotion * _speed) : 0;
-            velocity.z = IsFoot ? (vMotion * _speed) : 0;
-            _rigidbody.velocity = velocity;
+            if(IsFoot)
+            {
+                var velocity = _rigidbody.velocity;
+                velocity = ((hMotion * _cameraParent.transform.right) + (vMotion * _cameraParent.transform.forward)) * _speed;
+                velocity.y = _rigidbody.velocity.y;
+                _rigidbody.velocity = velocity;
+            }
 
 
             if (Mathf.Abs(hMotion) > 0 || Mathf.Abs(vMotion) > 0)
@@ -78,11 +99,11 @@ namespace Diamond.EggmanSimulator.Characters
                 direction.x = hMotion;
                 direction.z = vMotion;
 
-                transform.LookAt(transform.position + direction);
-                var spin = transform.eulerAngles;
+                _mainBody.transform.LookAt(_mainBody.transform.position + _rigidbody.velocity);
+                var spin = _mainBody.transform.eulerAngles;
                 spin.x = 0;
                 spin.z = 0;
-                transform.eulerAngles = spin;
+                _mainBody.transform.eulerAngles = spin;
 
                 if(_audioSource.clip != null && (!_audioSource.clip.Equals(_walkAudioClip)) || ! _audioSource.isPlaying)
                 {
@@ -143,7 +164,7 @@ namespace Diamond.EggmanSimulator.Characters
             if (rigidbody == null)
                 rigidbody = burret.AddComponent<Rigidbody>();
 
-            rigidbody.velocity = transform.forward * _burretSpeed;
+            rigidbody.velocity = _mainBody.transform.forward * _burretSpeed;
             rigidbody.velocity += Vector3.up;
         }
 
@@ -155,14 +176,14 @@ namespace Diamond.EggmanSimulator.Characters
         {
             get
             {
-                var all = Physics.BoxCastAll (transform.position, Vector3.one * 0.5f, Vector3.down,Quaternion.identity,1.0f);
+                var all = Physics.BoxCastAll (transform.position, Vector3.one * 0.5f, Vector3.down,Quaternion.identity,0.25f);
                 var result = all.ToList().Where(a => !a.collider.gameObject.Equals(gameObject));
                 return result.Count() >= 1;
             }
         }
 
         /// <summary>
-        /// ?A?j???[?V????????????
+        /// Invoked by animation
         /// </summary>
         public void StartThrowing()
         {
@@ -170,7 +191,7 @@ namespace Diamond.EggmanSimulator.Characters
         }
 
         /// <summary>
-        /// ?A?j???[?V????????????
+        /// Invoked by animation
         /// </summary>
         public void EndThrowing()
         {
